@@ -8,6 +8,7 @@ import pytesseract
 import os
 import subprocess
 import glob
+from music21 import converter, stream
 
 def get_file_type(file):
     mime = magic.from_file(file, mime=True)
@@ -145,3 +146,13 @@ def run_audiveris(input_folder: str, output_folder: str, audiveris_bin: str = ".
     subprocess.run(cmd, check=True)
     print(f"Audiveris finished. Musicxml saved to {output_folder}")
 
+def merge_mxl(files, output_path):
+    full_score = stream.Score()
+
+    for f in sorted(files):
+        score = converter.parse(f)
+        for part in score.parts:
+            full_score.append(part)
+
+    full_score.write("musicxml", output_path)
+    print(f"Merged MusicXML written to {output_path}")

@@ -1,4 +1,5 @@
-from utils import load_file_as_image, save_preprocessed_images, run_audiveris
+from utils import load_file_as_image, save_preprocessed_images, run_audiveris, merge_mxl
+import glob
 
 if __name__ == "__main__":
 
@@ -12,3 +13,6 @@ if __name__ == "__main__":
     # 2️⃣ Run Audiveris to generate MusicXML
     output_folder = "./musicxml"
     run_audiveris(temp_folder, output_folder)
+
+    files = glob.glob("./musicxml/*.mxl")
+    merge_mxl(files, "./musicxml/full_score.mxl")
