@@ -8,7 +8,7 @@ import pytesseract
 import os
 import subprocess
 import glob
-from music21 import converter, stream
+from music21 import converter, stream, pitch, note, chord
 
 def get_file_type(file):
     mime = magic.from_file(file, mime=True)
@@ -156,3 +156,41 @@ def merge_mxl(files, output_path):
 
     full_score.write("musicxml", output_path)
     print(f"Merged MusicXML written to {output_path}")
+
+def mxl_to_midi(xml_path, midi_path):
+    """
+    Converts a MusicXML file to MIDI, automatically adjusts the octave
+    to a reasonable piano range, and plays it via FluidSynth.
+    """
+
+    # 1️⃣ Load score
+    score = converter.parse(xml_path)
+
+    # 2️⃣ Collect all MIDI pitches
+    midi_pitches = []
+    for n in score.recurse().notes:
+        if isinstance(n, note.Note):
+            midi_pitches.append(n.pitch.midi)
+        elif isinstance(n, chord.Chord):
+            midi_pitches.extend(p.midi for p in n.pitches)
+
+    # 3️⃣ Compute average pitch
+    avg_pitch = sum(midi_pitches) / len(midi_pitches)
+
+    # 4️⃣ Decide octave shift (piano range ~ C2=36 to C6=84)
+    shift = 0
+    if avg_pitch < 36:
+        shift = 12  # too low → up an octave
+    elif avg_pitch > 72:
+        shift = -12  # too high → down an octave
+
+    # 5️⃣ Transpose all notes/chords
+    if shift != 0:
+        for n in score.recurse().notes:
+            if isinstance(n, note.Note):
+                n.pitch = n.pitch.transpose(shift)
+            elif isinstance(n, chord.Chord):
+                n.pitches = [p.transpose(shift) for p in n.pitches]
+
+    # 6️⃣ Write MIDI
+    score.write("midi", midi_path)

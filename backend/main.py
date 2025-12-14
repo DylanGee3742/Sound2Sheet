@@ -1,5 +1,6 @@
-from utils import load_file_as_image, save_preprocessed_images, run_audiveris, merge_mxl
+from utils import load_file_as_image, save_preprocessed_images, run_audiveris, merge_mxl, mxl_to_midi
 import glob
+from music21 import converter, key
 
 if __name__ == "__main__":
 
@@ -16,3 +17,13 @@ if __name__ == "__main__":
 
     files = glob.glob("./musicxml/*.mxl")
     merge_mxl(files, "./musicxml/full_score.mxl")
+    mxl_to_midi(    
+        "./musicxml/full_score.mxl",
+        "./musicxml/full_score.mid"
+    )
+
+    score = converter.parse("./musicxml/full_score.mid")
+    ks = score.analyze('key')
+    print(f"Detected key: {ks}")
+    # for n in score.recurse().notes:
+    #     print(n.nameWithOctave, n.pitch.midi)
