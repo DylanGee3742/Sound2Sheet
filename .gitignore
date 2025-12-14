@@ -1,2 +1,5 @@
 audiveris
 __pycache__
+musicxml
+temp_preprocessed
+.DS_Store
