@@ -6,3 +6,6 @@ music21==9.9.1
 PyMuPDF==1.26.6
 Pillow==12.0.0
 opencv-python==4.12.0.88
+python-magic==0.4.27
+pillow==12.0.0
+pytesseract==0.3.13
