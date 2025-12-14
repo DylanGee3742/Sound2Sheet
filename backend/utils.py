@@ -5,6 +5,9 @@ import io
 import cv2
 import numpy as np
 import pytesseract
+import os
+import subprocess
+import glob
 
 def get_file_type(file):
     mime = magic.from_file(file, mime=True)
@@ -109,3 +112,36 @@ def ocr_images(images):
         processed = preprocessing(img)
         text.append(pytesseract.image_to_string(processed))
     return "\n".join(text)
+
+
+def save_preprocessed_images(images, output_dir: str):
+    os.makedirs(output_dir, exist_ok=True)
+    saved_files = []
+    for i, img in enumerate(images):
+        processed = preprocessing(img)
+        path = os.path.join(output_dir, f"page_00{i+1}.png")
+        processed.save(path)
+        saved_files.append(path)
+    return saved_files
+
+
+def run_audiveris(input_folder: str, output_folder: str, audiveris_bin: str = "./audiveris/bin/Audiveris"):
+    """
+    Run Audiveris CLI on a folder of proprocessed images.
+    """
+    os.makedirs(output_folder, exist_ok=True)
+
+    images = sorted(glob.glob(os.path.join(input_folder, "*.png")))
+    print(images)
+
+    cmd = [
+        audiveris_bin,
+        "-batch",
+        "-export",
+        "-output", output_folder,
+        *images
+    ]
+
+    subprocess.run(cmd, check=True)
+    print(f"Audiveris finished. Musicxml saved to {output_folder}")
+
