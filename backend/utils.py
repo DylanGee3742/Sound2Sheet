@@ -115,7 +115,7 @@ def ocr_images(images):
     return "\n".join(text)
 
 
-def save_preprocessed_images(images, output_dir: str):
+def save_preprocessed_images(images, output_dir: str,):
     os.makedirs(output_dir, exist_ok=True)
     saved_files = []
     for i, img in enumerate(images):
@@ -133,7 +133,6 @@ def run_audiveris(input_folder: str, output_folder: str, audiveris_bin: str = ".
     os.makedirs(output_folder, exist_ok=True)
 
     images = sorted(glob.glob(os.path.join(input_folder, "*.png")))
-    print(images)
 
     cmd = [
         audiveris_bin,
@@ -151,8 +150,10 @@ def merge_mxl(files, output_path):
 
     for f in sorted(files):
         score = converter.parse(f)
+
         for part in score.parts:
-            full_score.append(part)
+            clean_part = part.flatten()
+            full_score.append(clean_part)
 
     full_score.write("musicxml", output_path)
     print(f"Merged MusicXML written to {output_path}")
